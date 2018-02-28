@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Invoice</title>
+    <link href="https://fonts.googleapis.com/css?family=Galindo|Roboto" rel="stylesheet">
+    <style>
+    @page {
+        size: A4;
+        margin: 0;
+    }
+    @media screen {
+        body {
+            background-color: #ccc;
+        }
+    }
+    </style>
+    <link rel="stylesheet" href="style.min.css">
+</head>
+<body>
+    <header>
+        <h1>Krampstudio SARL</h1>
+    </header>
+    <main>
+        <section class="invoice-data">
+            <div>
+                <dl>
+                    <dt>Note de crédit n°</dt>
+                    <dd>{{id}}</dd>
+                    <dt>Date</dt>
+                    <dd>{{date}}</dd>
+                    <dt>Référence de facture</dt>
+                    <dd>{{invoice}}</dd>
+                    <dt>Date de facture</dt>
+                    <dd>{{invoiceDate}}</dd>
+                    <dt>Date de paiement</dt>
+                    <dd>{{dueDate}}</dd>
+                    <dt>Montant remboursé</dt>
+                    <dd class="due-amount">{{eur total}}</dd>
+                </dl>
+            </div>
+            <address>
+                <strong>{{customer.name}}</strong><br>
+                {{customer.address}}<br>
+                {{customer.zip}} {{customer.city}}<br>
+                {{customer.country}}<br>
+                {{#if customer.vat}}
+                <em>{{customer.vat}}</em>
+                {{/if}}
+            </address>
+        </section>
+        <section class="invoice-details">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Article</th>
+                        <th>Description</th>
+                        <th>Coût unitaire</th>
+                        <th>Quantité</th>
+                        <th width="20%">Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {{#each items}}
+                    <tr>
+                        <th>{{title}}</th>
+                        <td>{{description}}</td>
+                        <td>{{eur price}}</td>
+                        <td>{{count}}</td>
+                        <td>{{eur rowPrice}}</td>
+                    </tr>
+                {{/each}}
+                </tbody>
+                <tfoot>
+                {{#if vat}}
+                    <tr>
+                        <td colspan="2"></td>
+                        <th colspan="2">Total</th>
+                        <th>{{eur totalExcludingTaxes}}</th>
+                    </tr>
+                    <tr>
+                        <td colspan="2"></td>
+                        <th colspan="2">TVA {{vat}}%</th>
+                        <th>{{eur totalTaxes}}</th>
+                    </tr>
+                    <tr>
+                        <td colspan="2"></td>
+                        <th colspan="2">Total TTC</th>
+                        <th>{{eur total}}</th>
+                    </tr>
+                {{else}}
+                    <tr>
+                        <td colspan="2"></td>
+                        <th colspan="2">Total</th>
+                        <th>{{eur total}}</th>
+                    </tr>
+                {{/if}}
+                </tfoot>
+            </table>
+
+        </section>
+        <section class="paiement">
+            <p>{{{mention}}}</p>
+        </section>
+    </main>
+    <footer>
+        <address>
+            <strong>{{company.title}}</strong><br>
+            {{company.address}}<br>
+            {{company.zip}} {{company.city}}<br>
+            {{company.country}}<br>
+            <a href="#">{{company.email}}</a><br>
+            <a href="#">{{company.phone}}</a>
+        </address>
+        <div>
+            {{company.registrationId}}<br>
+            {{company.vat}}
+        </div>
+    </footer>
+</body>
+</html>
