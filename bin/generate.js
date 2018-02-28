@@ -21,7 +21,7 @@ const processData = data => {
         if(typeof data.vat === 'number' && data.vat > 0){
             data.totalExcludingTaxes = total;
             data.totalTaxes = (total * data.vat) / 100;
-            data.total = total + data.totalIncludingTaxes;
+            data.total = total + data.totalTaxes;
         } else {
             data.total = total;
         }
@@ -52,6 +52,53 @@ const getPreviousDocs = async (outputDir) => {
         }, docs);
 };
 
+const getAllDataFiles = async (dataDir) => {
+    const data = {};
+    const files = await fs.readdir(dataDir);
+    return files
+        .map( f => path.basename(f))
+        .filter( name => /\.json/.test(name))
+        .reduce( (acc, name) => {
+            types.forEach( type => {
+                if(new RegExp('^' + type).test(name)){
+                    acc[type] = acc[type] || [];
+                    acc[type].push(name);
+                }
+            });
+            return acc;
+        }, data);
+
+};
+
+const generateIndex = async(outputDir) => {
+    const indexTemplate = path.join(projectRoot, 'src/tpl/index.hbs');
+    const indexOutput   = path.join(outputDir, 'index.html');
+    const docData = await getPreviousDocs(outputDir);
+    return await generateTemplate(indexTemplate, indexOutput, docData);
+};
+
+const generateFile = async(type, dataName, outputDir) => {
+
+    console.log(`[${type}] generate ${dataName}`);
+
+    const templateFile = path.join(projectRoot, 'src/tpl', `${type}.hbs`);
+    const dataFile = path.join(projectRoot, 'data', `${dataName}.json`);
+    const outputFile = path.join(outputDir, `${dataName}.html`);
+    const data  = await fs.readJson(dataFile);
+    return await generateTemplate(templateFile, outputFile, processData(data));
+}
+
+const generateAllFiles = async (outputDir) => {
+    const dataDir = path.join(projectRoot, 'data');
+    const data = await getAllDataFiles(dataDir);
+    for (let type of Object.keys(data)) {
+        for (let file of data[type]){
+            let dataName = file.replace('.json', '');
+            await generateFile(type, dataName, outputDir);
+        }
+    }
+};
+
 Handlebars.registerHelper('eur', value => accounting.formatMoney(value, '€', 2, ' ', ',', '%v %s'));
 
 
@@ -66,22 +113,16 @@ program
 
 ( async () => {
     try {
-        const indexTemplate = path.join(projectRoot, 'src/tpl/index.hbs');
-        const indexOutput   = path.join(program.output, 'index.html');
+        if(program.data) {
+            await generateFile(program.type, program.data, program.output);
+        } else {
+            await generateAllFiles(program.output);
+        }
 
-        const templateFile = path.join(projectRoot, 'src/tpl', `${program.type}.hbs`);
-        const dataFile = path.join(projectRoot, 'data', `${program.data}.json`);
-        const outputFile = path.join(program.output, `${program.data}.html`);
-        const data  = await fs.readJson(dataFile);
-        await generateTemplate(templateFile, outputFile, processData(data));
-
-        const docData = await getPreviousDocs(program.output);
-        await generateTemplate(indexTemplate, indexOutput, docData);
+        await generateIndex(program.output);
 
         if( program.print ) {
             //TODO with pupetter
-        } else {
-            console.log(`File ${outputFile} generated`);
         }
     } catch(err) {
         console.error(err);

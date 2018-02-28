@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Invoice</title>
+    <title>Krampstudio - Facture</title>
     <link href="https://fonts.googleapis.com/css?family=Galindo|Roboto" rel="stylesheet">
     <style>
     @page {
@@ -29,11 +29,11 @@
                     <dd>{{id}}</dd>
                     <dt>Date</dt>
                     <dd>{{date}}</dd>
+                    {{#if dueDate}}
                     <dt>Date d'échéance</dt>
-                    <dd>{{invoiceDate}}</dd>
-                    <dt>Date de paiement</dt>
                     <dd>{{dueDate}}</dd>
-                    <dt>Montant remboursé</dt>
+                    {{/if}}
+                    <dt>Montant dû</dt>
                     <dd class="due-amount">{{eur total}}</dd>
                 </dl>
             </div>
@@ -43,6 +43,7 @@
                 {{customer.zip}} {{customer.city}}<br>
                 {{customer.country}}<br>
                 {{#if customer.vat}}
+                <br>
                 <em>{{customer.vat}}</em>
                 {{/if}}
             </address>
