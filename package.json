@@ -8,7 +8,9 @@
     "dev:sass": "npm run build:sass -- --watch",
     "dev:start": "lite-server --baseDir=dist ",
     "dev": "run-p dev:sass dev:start",
-    "build": "run-p build:sass"
+    "build": "run-p build:sass",
+    "generate" : "./bin/generate.js",
+    "start" : "run-s generate dev:start"
   },
   "repository": {
     "type": "git",
